@@ -8,7 +8,7 @@ const MyAnimeList = function (username, password) {
     this.password = password;
 };
 
-MyAnimeList.prototype.getUserList = async function (type="anime") {
+MyAnimeList.getUserList = async function (type="anime") {
     if (type !== "anime" && type !== "manga") {
         throw new Error("Argument type should be 'anime' or 'manga' only.");
     }
