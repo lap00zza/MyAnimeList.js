@@ -8,12 +8,15 @@ const MyAnimeList = function (username, password) {
     this.password = password;
 };
 
-MyAnimeList.getUserList = async function (type="anime") {
+MyAnimeList.getUserList = async function (username, type="anime") {
+    if (!username) {
+        throw new Error("username is required")
+    }
     if (type !== "anime" && type !== "manga") {
-        throw new Error("Argument type should be 'anime' or 'manga' only.");
+        throw new Error("type should be 'anime' or 'manga' only.");
     }
     try {
-        const endpoint = `https://myanimelist.net/malappinfo.php?u=${this.username}&status=all&type=${type}`;
+        const endpoint = `https://myanimelist.net/malappinfo.php?u=${username}&status=all&type=${type}`;
         const response = await fetch(endpoint);
         if (!response.ok) {
             throw new Error(response.status.toString());
