@@ -8,8 +8,15 @@ API wrapper for MyAnimeList.net
 ```js
 const MyAnimeList = require("myanimelist.js");
 
+// Get users Anime or Manga list
 MyAnimeList.getUserList("lapoozza", "anime")
     .then(r => r.myanimelist.anime.forEach(x => console.log("+", x.series_title[0])))
+    .catch(e => console.error(e));
+
+// Search for Anime or Manga
+const mal = new MyAnimeList("USERNAME", "PASSWORD");
+mal.search("boruto", "anime")
+    .then(r => console.log(r))
     .catch(e => console.error(e));
 ```
 

@@ -30,7 +30,7 @@ MyAnimeList.getUserList = function (username, type = "anime") {
             parseString(body, function (err, result) {
                 resolve(result);
             });
-        })
+        });
     });
 };
 
@@ -72,7 +72,7 @@ MyAnimeList.prototype.search = function (name, type = "anime") {
             })
             .on("error", function (err) {
                 reject(err);
-            })
+            });
     });
 };
 
