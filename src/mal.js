@@ -52,10 +52,6 @@ MyAnimeList.prototype.search = function (name, type = "anime") {
     }
     const endpoint = `https://myanimelist.net/api/${type}/search.xml?q=${name}`;
     return new Promise((resolve, reject) => {
-        // Why not use the callback method?
-        // Well, with that approach we cant capture the 204 because
-        // request starts parsing the body. And since 204 returns no
-        // body, we end up getting a Parse Error.
         request.get({
             url: endpoint,
             headers: {
