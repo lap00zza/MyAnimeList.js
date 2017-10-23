@@ -23,9 +23,11 @@ MyAnimeList.getUserList = function (username, type = "anime") {
     const endpoint = `https://myanimelist.net/mal23appinfo.php?u=${username}&status=all&type=${type}`;
     return new Promise((resolve, reject) => {
         request.get(endpoint, function (err, resp, body) {
-            if (err) reject(err);
-            if (resp.statusCode < 200 || resp.statusCode > 299) {
-                reject(resp.statusCode);
+            if (err) { /* Other errors */
+                return reject(err);
+            }
+            if (resp.statusCode < 200 || resp.statusCode > 299) { /* Status Code errors */
+                return reject(resp.statusCode);
             }
             parseString(body, function (err, result) {
                 resolve(result);
@@ -54,25 +56,25 @@ MyAnimeList.prototype.search = function (name, type = "anime") {
         // Well, with that approach we cant capture the 204 because
         // request starts parsing the body. And since 204 returns no
         // body, we end up getting a Parse Error.
-        request
-            .get({
-                url: endpoint,
-                headers: {
-                    authorization: `Basic ${this.token}`,
-                }
-            })
-            .on("response", function (resp) {
-                if (resp.statusCode === 204) {
-                    reject(204);
-                }
-                if (resp.statusCode < 200 || resp.statusCode > 299) {
-                    reject(resp.statusCode);
-                }
-                resolve(resp);
-            })
-            .on("error", function (err) {
-                reject(err);
+        request.get({
+            url: endpoint,
+            headers: {
+                authorization: `Basic ${this.token}`,
+            }
+        }, function (err, resp, body) {
+            if (err && !body) { /* happens during 204 only */
+                return reject(204);
+            }
+            if (err) { /* Other errors */
+                return reject(err);
+            }
+            if (resp.statusCode < 200 || resp.statusCode > 299) { /* Status Code errors */
+                return reject(resp.statusCode);
+            }
+            parseString(body, function (err, result) {
+                resolve(result);
             });
+        });
     });
 };
 

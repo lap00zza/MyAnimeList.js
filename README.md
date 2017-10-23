@@ -1,5 +1,3 @@
-# `Not yet ready for use. Please use at own risk.`
-
 # MyAnimeList.js
 API wrapper for MyAnimeList.net
 
