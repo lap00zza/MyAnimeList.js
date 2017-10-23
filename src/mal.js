@@ -1,6 +1,5 @@
-const {promisify} = require("util");
-const request = require("request-promise-native");
-const parseString = promisify(require("xml2js").parseString);
+const request = require("request");
+const parseString = require("xml2js").parseString;
 
 const MyAnimeList = function (username, password) {
     this.username = username;
@@ -14,30 +13,35 @@ const MyAnimeList = function (username, password) {
  * @param {String} type - Type of list. Can be "anime" or "manga".
  * @static
  */
-MyAnimeList.getUserList = async function (username, type = "anime") {
+MyAnimeList.getUserList = function (username, type = "anime") {
     if (!username) {
         throw new Error("username is required")
     }
     if (type !== "anime" && type !== "manga") {
         throw new Error("type should be 'anime' or 'manga' only");
     }
-    const endpoint = `https://myanimelist.net/malappinfo.php?u=${username}&status=all&type=${type}`;
-    try {
-        const response = await request.get(endpoint);
-        return await parseString(response);
-    } catch (err) {
-        throw new Error(err.message);
-    }
+    const endpoint = `https://myanimelist.net/mal23appinfo.php?u=${username}&status=all&type=${type}`;
+    return new Promise((resolve, reject) => {
+        request.get(endpoint, function (err, resp, body) {
+            if (err) reject(err);
+            if (resp.statusCode < 200 || resp.statusCode > 299) {
+                reject(resp.statusCode);
+            }
+            parseString(body, function (err, result) {
+                resolve(result);
+            });
+        })
+    });
 };
 
 
 /**
- * Search MyAnimeList for anime or manga.
+ * Search MyAnimeList for anime or manga. Remember if this promise is rejected
+ * with 204, it means that the anime or manga does not exist in MyAnimeList.
  * @param {String} name - Name of the anime or manga.
  * @param {String} type - Type of list. Can be "anime" or "manga".
- * @todo: need to handle 204 empty returns
  */
-MyAnimeList.prototype.search = async function (name, type="anime") {
+MyAnimeList.prototype.search = function (name, type = "anime") {
     if (!name) {
         throw new Error("name is required")
     }
@@ -45,16 +49,31 @@ MyAnimeList.prototype.search = async function (name, type="anime") {
         throw new Error("type should be 'anime' or 'manga' only");
     }
     const endpoint = `https://myanimelist.net/api/${type}/search.xml?q=${name}`;
-    try {
-        const response = await request.get(endpoint, {
-            headers: {
-                authorization: `Basic ${this.token}`,
-            }
-        });
-        return await parseString(response);
-    } catch (err) {
-        throw new Error(err.message);
-    }
+    return new Promise((resolve, reject) => {
+        // Why not use the callback method?
+        // Well, with that approach we cant capture the 204 because
+        // request starts parsing the body. And since 204 returns no
+        // body, we end up getting a Parse Error.
+        request
+            .get({
+                url: endpoint,
+                headers: {
+                    authorization: `Basic ${this.token}`,
+                }
+            })
+            .on("response", function (resp) {
+                if (resp.statusCode === 204) {
+                    reject(204);
+                }
+                if (resp.statusCode < 200 || resp.statusCode > 299) {
+                    reject(resp.statusCode);
+                }
+                resolve(resp);
+            })
+            .on("error", function (err) {
+                reject(err);
+            })
+    });
 };
 
 module.exports = MyAnimeList;
