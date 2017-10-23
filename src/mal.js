@@ -11,7 +11,7 @@ const MyAnimeList = function (username, password) {
  * Fetch users anime or manga list.
  * @param {String} username - MAL username
  * @param {String} type - Type of list. Can be "anime" or "manga"
- * @returns {Array} - Array of anime of manga
+ * @returns {Promise} - Array of anime of manga
  * @static
  */
 MyAnimeList.getUserList = function (username, type = "anime") {
@@ -42,7 +42,7 @@ MyAnimeList.getUserList = function (username, type = "anime") {
  * Search MyAnimeList for anime or manga.
  * @param {String} name - Name of the anime or manga
  * @param {String} type - Type of list. Can be "anime" or "manga"
- * @returns {Array} - Array of anime of manga
+ * @returns {Promise} - Array of anime of manga
  */
 MyAnimeList.prototype.search = function (name, type = "anime") {
     if (!name) {
@@ -69,7 +69,10 @@ MyAnimeList.prototype.search = function (name, type = "anime") {
                 return reject(resp.statusCode);
             }
             parseString(body, {explicitArray: false}, function (err, result) {
-                resolve(result["anime"]["entry"]);
+                const list = result["anime"]["entry"] instanceof Array
+                    ? result["anime"]["entry"]
+                    : [result["anime"]["entry"]];
+                resolve(list);
             });
         });
     });
