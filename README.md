@@ -10,7 +10,7 @@ const MyAnimeList = require("myanimelist.js");
 
 // Get users Anime or Manga list
 MyAnimeList.getUserList("lapoozza", "anime")
-    .then(r => r.myanimelist.anime.forEach(x => console.log("+", x.series_title[0])))
+    .then(r => r.forEach(x => console.log("+", x.series_title[0])))
     .catch(e => console.error(e));
 
 // Search for Anime or Manga
