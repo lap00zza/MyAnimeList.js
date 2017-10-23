@@ -30,7 +30,7 @@ MyAnimeList.getUserList = function (username, type = "anime") {
             if (resp.statusCode < 200 || resp.statusCode > 299) { /* Status Code errors */
                 return reject(resp.statusCode);
             }
-            parseString(body, function (err, result) {
+            parseString(body, {explicitArray: false}, function (err, result) {
                 resolve(result["myanimelist"][type] || []);
             });
         });
@@ -68,7 +68,7 @@ MyAnimeList.prototype.search = function (name, type = "anime") {
             if (resp.statusCode < 200 || resp.statusCode > 299) { /* Status Code errors */
                 return reject(resp.statusCode);
             }
-            parseString(body, function (err, result) {
+            parseString(body, {explicitArray: false}, function (err, result) {
                 resolve(result["anime"]["entry"]);
             });
         });
