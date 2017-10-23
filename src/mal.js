@@ -10,7 +10,8 @@ const MyAnimeList = function (username, password) {
 /**
  * Fetch users anime or manga list.
  * @param {String} username - MAL username
- * @param {String} type - Type of list. Can be "anime" or "manga".
+ * @param {String} type - Type of list. Can be "anime" or "manga"
+ * @returns {Array} - Array of anime of manga
  * @static
  */
 MyAnimeList.getUserList = function (username, type = "anime") {
@@ -20,7 +21,7 @@ MyAnimeList.getUserList = function (username, type = "anime") {
     if (type !== "anime" && type !== "manga") {
         throw new Error("type should be 'anime' or 'manga' only");
     }
-    const endpoint = `https://myanimelist.net/mal23appinfo.php?u=${username}&status=all&type=${type}`;
+    const endpoint = `https://myanimelist.net/malappinfo.php?u=${username}&status=all&type=${type}`;
     return new Promise((resolve, reject) => {
         request.get(endpoint, function (err, resp, body) {
             if (err) { /* Other errors */
@@ -30,7 +31,7 @@ MyAnimeList.getUserList = function (username, type = "anime") {
                 return reject(resp.statusCode);
             }
             parseString(body, function (err, result) {
-                resolve(result);
+                resolve(result["myanimelist"][type] || []);
             });
         });
     });
@@ -38,10 +39,10 @@ MyAnimeList.getUserList = function (username, type = "anime") {
 
 
 /**
- * Search MyAnimeList for anime or manga. Remember if this promise is rejected
- * with 204, it means that the anime or manga does not exist in MyAnimeList.
- * @param {String} name - Name of the anime or manga.
- * @param {String} type - Type of list. Can be "anime" or "manga".
+ * Search MyAnimeList for anime or manga.
+ * @param {String} name - Name of the anime or manga
+ * @param {String} type - Type of list. Can be "anime" or "manga"
+ * @returns {Array} - Array of anime of manga
  */
 MyAnimeList.prototype.search = function (name, type = "anime") {
     if (!name) {
@@ -59,7 +60,7 @@ MyAnimeList.prototype.search = function (name, type = "anime") {
             }
         }, function (err, resp, body) {
             if (err && !body) { /* happens during 204 only */
-                return reject(204);
+                return resolve([]);
             }
             if (err) { /* Other errors */
                 return reject(err);
@@ -68,7 +69,7 @@ MyAnimeList.prototype.search = function (name, type = "anime") {
                 return reject(resp.statusCode);
             }
             parseString(body, function (err, result) {
-                resolve(result);
+                resolve(result["anime"]["entry"]);
             });
         });
     });
