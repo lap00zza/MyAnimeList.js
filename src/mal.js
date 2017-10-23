@@ -1,6 +1,5 @@
-// TODO: compatibility with browser
-const fetch = require("node-fetch");
-const { promisify } = require("util");
+const {promisify} = require("util");
+const request = require("request-promise-native");
 const parseString = promisify(require("xml2js").parseString);
 
 const MyAnimeList = function (username, password) {
@@ -8,7 +7,13 @@ const MyAnimeList = function (username, password) {
     this.password = password;
 };
 
-MyAnimeList.getUserList = async function (username, type="anime") {
+/**
+ * Fetches users anime or manga list
+ * @param {String} username - MAL username
+ * @param {String} type - Type of list. Can be "anime" or "manga".
+ * @static
+ */
+MyAnimeList.getUserList = async function (username, type = "anime") {
     if (!username) {
         throw new Error("username is required")
     }
@@ -17,11 +22,8 @@ MyAnimeList.getUserList = async function (username, type="anime") {
     }
     try {
         const endpoint = `https://myanimelist.net/malappinfo.php?u=${username}&status=all&type=${type}`;
-        const response = await fetch(endpoint);
-        if (!response.ok) {
-            throw new Error(response.status.toString());
-        }
-        return await parseString(await response.text());
+        const response = await request.get(endpoint);
+        return await parseString(response);
     } catch (err) {
         throw new Error(err.message);
     }
