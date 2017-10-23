@@ -1,6 +1,6 @@
 {
   "name": "myanimelist.js",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "API Wrapper for MyAnimeList",
   "main": "./src/mal.js",
   "scripts": {
